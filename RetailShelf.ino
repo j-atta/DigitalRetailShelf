@@ -17,33 +17,48 @@ const char* ssid = "NetComm 9343";
 const char* password = "harelagehi";
 String URL = "http://192.168.20.18/retailshelf/index.php";
 
+unsigned int Actual_Millis, Previous_Millis;
+int refreshTime = 1000; // ms
+
 // INFO FOR DISPLAY
-// const char productName[];
-// const char productBrand[];
-// int productPrice;
-// int productPromoPrice;
-// int productPromoStatus;
-// int productSOH;
+String productNumber = "";
+String productName = "";
+String productBrand =  "";
+String productPrice = "";
+String productPromoPrice = "";
+String productPromoStatus = "";
+String productSOH = "";
 
 void setup() {
   // Initialisation
   Serial.begin(115200);
   display.init(115200, true, 2, false);
   setupWifi(ssid, password);
-  printText();
+  SetFromServer();
+  updateDisplay();
+
+  Actual_Millis = millis();               //Save time for refresh loop
+  Previous_Millis = Actual_Millis; 
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-   if(WiFi.status()== WL_CONNECTED) {
-    // Do stuff here
-   }
-   else {
-    Serial.println("WIFI connection error");
-   }
+  Actual_Millis = millis();
+  if(Actual_Millis - Previous_Millis > refreshTime) {
+    Previous_Millis = Actual_Millis;
+    if(WiFi.status()== WL_CONNECTED) {
+      if(CheckServer()) {
+        SetFromServer();
+        updateDisplay();
+      }
+    }
+    else {
+      Serial.println("WIFI connection error");
+    }
+  }
 } 
 
-void printText() {
+void updateDisplay() {
   display.setRotation(1);
   display.setFont(&FreeMonoBold9pt7b);
   display.setTextColor(GxEPD_BLACK);
@@ -52,10 +67,18 @@ void printText() {
   {
     display.fillScreen(GxEPD_WHITE);
     display.setCursor(0, 20);
-    display.println(String("SKU: " + getProductNumberFromServer()).c_str());
-    display.println(String("Name: " + getProductNameFromServer()).c_str());
-    display.println(String("Brand: " + getProductBrandFromServer()).c_str());
-    display.println(String("Price: $" + getProductPriceFromServer()).c_str());
+    if (productPromoStatus.toInt() == 1) {
+      display.println(String("SKU: " + productNumber).c_str());
+      display.println(String("Name: " + productName).c_str());
+      display.println(String("Brand: " + productBrand).c_str());
+      display.println(String("Sale Price: $" + productPromoPrice).c_str());
+    }
+    else {
+      display.println(String("SKU: " + productNumber).c_str());
+      display.println(String("Name: " + productName).c_str());
+      display.println(String("Brand: " + productBrand).c_str());
+      display.println(String("Price: $" + productPrice).c_str());
+    }
 
   }
   while (display.nextPage());
@@ -131,4 +154,26 @@ String getProductSohFromServer() {
   int response_code = http.POST("get_product_soh");
   
   return http.getString();
+}
+
+void SetFromServer() {
+  productNumber = getProductNumberFromServer();
+  productName = getProductNameFromServer();
+  productBrand =  getProductBrandFromServer();
+  productPrice = getProductPriceFromServer();
+  productPromoStatus = getProductPromoStatusFromServer();
+  productPromoPrice = getProductPromoPriceFromServer();
+  productSOH = getProductSohFromServer();
+}
+
+bool CheckServer() {
+  if(!productNumber.equals(getProductNumberFromServer())) return true;
+  if(!productName.equals(getProductNameFromServer())) return true;
+  if(!productBrand.equals(getProductBrandFromServer())) return true;
+  if(!productPrice.equals(getProductPriceFromServer())) return true;
+  if(!productPromoStatus.equals(getProductPromoStatusFromServer())) return true;
+  if(!productPromoPrice.equals(getProductPromoPriceFromServer())) return true;
+  if(!productSOH.equals(getProductSohFromServer())) return true;
+
+  return false;
 }
