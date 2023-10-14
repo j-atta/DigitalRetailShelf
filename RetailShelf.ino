@@ -4,15 +4,19 @@
 
 // CONSTANTS
 #define ENABLE_GxEPD2_GFX 0
+#define LED_PIN 22
+#define NUM_PIXELS 15
 
 // INCLUDES
 #include <GxEPD2_BW.h>
+#include <Adafruit_NeoPixel.h>
 #include <Fonts/FreeMonoBold9pt7b.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
 
 // GLOBAL VARIABLES
 GxEPD2_BW<GxEPD2_213_B74, GxEPD2_213_B74::HEIGHT> display(GxEPD2_213_B74(SS, 17, 16, 4));
+Adafruit_NeoPixel WS2812B(NUM_PIXELS, LED_PIN, NEO_GRB + NEO_KHZ800);
 const char* ssid = "NetComm 9343";
 const char* password = "harelagehi";
 String URL = "http://192.168.20.18/retailshelf/index.php";
@@ -33,9 +37,11 @@ void setup() {
   // Initialisation
   Serial.begin(115200);
   display.init(115200, true, 2, false);
+  WS2812B.begin();
   setupWifi(ssid, password);
   SetFromServer();
   updateDisplay();
+  updateLights();
 
   Actual_Millis = millis();               //Save time for refresh loop
   Previous_Millis = Actual_Millis; 
@@ -50,6 +56,7 @@ void loop() {
       if(CheckServer()) {
         SetFromServer();
         updateDisplay();
+        updateLights();
       }
     }
     else {
@@ -82,6 +89,26 @@ void updateDisplay() {
 
   }
   while (display.nextPage());
+}
+
+void updateLights() {
+  if (productSOH.toInt() <= 2) {
+    for (int pixel = 0; pixel < NUM_PIXELS; pixel++) {
+      WS2812B.setPixelColor(pixel, WS2812B.Color(255, 0, 0));
+    }
+  }
+  else if (productSOH.toInt() > 2 && productSOH.toInt() <= 4) {
+    for (int pixel = 0; pixel < NUM_PIXELS; pixel++) {
+      WS2812B.setPixelColor(pixel, WS2812B.Color(255, 191, 0));
+    }
+  }
+  else {
+    for (int pixel = 0; pixel < NUM_PIXELS; pixel++) {
+      WS2812B.setPixelColor(pixel, WS2812B.Color(0, 255, 0));
+    }
+  }
+
+  WS2812B.show();
 }
 
 void setupWifi(const char* initName, const char* initPassword ) {
