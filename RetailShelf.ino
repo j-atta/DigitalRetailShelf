@@ -17,9 +17,9 @@
 // GLOBAL VARIABLES
 GxEPD2_BW<GxEPD2_213_B74, GxEPD2_213_B74::HEIGHT> display(GxEPD2_213_B74(SS, 17, 16, 4));
 Adafruit_NeoPixel WS2812B(NUM_PIXELS, LED_PIN, NEO_GRB + NEO_KHZ800);
-const char* ssid = "Joel's Z Fold 5";
-const char* password = "P07d(up80@rdH";
-String URL = "https://digital-retail-shelf.000webhostapp.com/index.php";
+const char* ssid = "NetComm 9343";
+const char* password = "harelagehi";
+String URL = "http://192.168.20.18/retailshelf/index.php";
 
 unsigned int Actual_Millis, Previous_Millis;
 int refreshTime = 1000; // ms
@@ -31,6 +31,7 @@ String productBrand =  "";
 String productPrice = "";
 String productPromoPrice = "";
 String productPromoStatus = "";
+String productPromoEnd = "";
 String productSOH = "";
 
 void setup() {
@@ -79,6 +80,7 @@ void updateDisplay() {
       display.println(String("Name: " + productName).c_str());
       display.println(String("Brand: " + productBrand).c_str());
       display.println(String("Sale Price: $" + productPromoPrice).c_str());
+      display.println(String("Sale Ends On: " + productPromoEnd).c_str());
     }
     else {
       display.println(String("SKU: " + productNumber).c_str());
@@ -174,6 +176,15 @@ String getProductPromoPriceFromServer() {
   return http.getString();
 }
 
+String getProductPromoEndFromServer() {
+  HTTPClient http;
+  http.begin(URL);
+  http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+  int response_code = http.POST("get_product_promo_end");
+  
+  return http.getString();
+}
+
 String getProductSohFromServer() {
   HTTPClient http;
   http.begin(URL);
@@ -190,6 +201,7 @@ void SetFromServer() {
   productPrice = getProductPriceFromServer();
   productPromoStatus = getProductPromoStatusFromServer();
   productPromoPrice = getProductPromoPriceFromServer();
+  productPromoEnd = getProductPromoEndFromServer();
   productSOH = getProductSohFromServer();
 }
 
@@ -200,6 +212,7 @@ bool CheckServer() {
   if(!productPrice.equals(getProductPriceFromServer())) return true;
   if(!productPromoStatus.equals(getProductPromoStatusFromServer())) return true;
   if(!productPromoPrice.equals(getProductPromoPriceFromServer())) return true;
+  if(!productPromoEnd.equals(getProductPromoEndFromServer())) return true;
   if(!productSOH.equals(getProductSohFromServer())) return true;
 
   return false;

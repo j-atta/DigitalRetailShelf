@@ -1,9 +1,9 @@
 <?php 
 
 $servername = "localhost";
-$username = "id21403709_admin";
-$password = "2wZBB^575%9<";
-$database = "id21403709_mystore";
+$username = "root";
+$password = "";
+$database = "mystore";
 
 $conn = mysqli_connect($servername, $username, $password, $database);
 
@@ -89,6 +89,20 @@ if (isset($_POST['get_product_promo_price'])) {
     // output data of each row
     while($row = $result->fetch_assoc()) {
       echo $row["prod_promo_price"];
+    }
+  } else {
+    echo "0 results";
+  }
+}
+
+if (isset($_POST['get_product_promo_end'])) {
+  $sql = "SELECT prod_promo_end FROM products WHERE prod_no = 50079832";
+  $result = $conn->query($sql);
+
+  if ($result->num_rows > 0) {
+    // output data of each row
+    while($row = $result->fetch_assoc()) {
+      echo $row["prod_promo_end"];
     }
   } else {
     echo "0 results";
