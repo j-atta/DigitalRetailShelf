@@ -17,9 +17,9 @@
 // GLOBAL VARIABLES
 GxEPD2_BW<GxEPD2_213_B74, GxEPD2_213_B74::HEIGHT> display(GxEPD2_213_B74(SS, 17, 16, 4));
 Adafruit_NeoPixel WS2812B(NUM_PIXELS, LED_PIN, NEO_GRB + NEO_KHZ800);
-const char* ssid = "NetComm 9343";
-const char* password = "harelagehi";
-String URL = "http://192.168.20.18/retailshelf/index.php";
+const char* ssid = "Joel's Z Fold 5";
+const char* password = "P07d(up80@rdH";
+String URL = "https://digital-retail-shelf.000webhostapp.com/index.php";
 
 unsigned int Actual_Millis, Previous_Millis;
 int refreshTime = 1000; // ms
