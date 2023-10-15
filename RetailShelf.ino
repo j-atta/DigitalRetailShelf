@@ -5,7 +5,7 @@
 // CONSTANTS
 #define ENABLE_GxEPD2_GFX 0
 #define LED_PIN 22
-#define NUM_PIXELS 15
+#define NUM_PIXELS 60
 
 // INCLUDES
 #include <GxEPD2_BW.h>
